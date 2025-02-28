@@ -5,6 +5,9 @@ name: Maven Packages
 
 env:
   DOCKER_HUB_REPO: hafeezco75/devopsapp
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: allahis001
+  POSTGRES_DB: postgres
 
 on:
   push:
@@ -12,6 +15,37 @@ on:
 
 jobs:
   build:
+
+services:
+  postgres:
+    image: postgres:13
+
+    options: 
+      --health-cmd "pg_isready -U postgres"
+      --health-interval 10s
+      --health-timeout 5s
+      --health-retries 5
+      
+    ports:
+      - 5432:5432
+
+      - name: Wait for postgres to be ready
+        run: |
+          for i in {1..30}; do
+            if pg_isready -h localhost -p 5432 -U postgres; then
+              echo "Postgres is ready"
+              break
+            fi
+            echo "Waiting for postgres..."
+            sleep 1
+          done  
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+         fetch-depth: 0
+
+
 
     runs-on: ubuntu-latest
     permissions:
